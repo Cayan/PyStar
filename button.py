@@ -15,45 +15,40 @@ from colors import *
 from pygame.locals import *
 
 class Button:
+    background_color_hovered = white
+    background_color = gray
+    font_color = black
+    border_color = black
+    border_thickness = 1
 
-# Inicializa a classe
+    # Inicializa a classe
     #
-    # @in window: janela na qual esta celula pertence
-    # @in deffault_color: cor padrao de fundo
-    # @in font_color: cor da fonte
-    def __init__(self,window):
+    # @in window: janela na qual este botao pertence
+    def __init__(self, window, rect, font_rect,text, callback):
         self.window = window
-        self.default_color = (100,100,100)
-        self.font_color = (0,0,0)
-
-    #retorna a cor que devera ser usada no fundo do botao1
-    def hover_color_button1(self):
-        mouse = pygame.mouse.get_pos()
-        #mudar de cor quando o mouse estiver em cima
-        if mouse[0] > 20 and mouse[0] < 320 and mouse[1] < 70 and mouse[1] > 20:
-            return (255,255,255)
-        else:
-            return self.default_color
-
-    #retorna a cor que devera ser usada no fundo do botao2
-    def hover_color_button2(self):
-        mouse = pygame.mouse.get_pos()
-        #mudar de cor quando o mouse estiver em cima
-        if mouse[0] > 480 and mouse[0] < 780 and mouse[1] < 70 and mouse[1] > 20:
-            return (255,255,255)
-        else:
-            return self.default_color
-
-    #pinta o botao com as cores recebidas
-    def paint_button1(self):
-        pygame.draw.rect(self.window, self.hover_color_button1(), [20,20,300,50])
-        pygame.draw.rect(self.window, self.font_color, [20,20,300,50], 1)
-        font = pygame.font.Font(None, 50)
-        self.window.blit(font.render("Calcular", 1, self.font_color), [100,25,200,20])   
-    
-    def paint_button2(self):
-        pygame.draw.rect(self.window,self.hover_color_button2(),[480,20,300,50])
-        pygame.draw.rect(self.window,self.font_color,[480,20,300,50],1)
-        font = pygame.font.Font(None, 50)
-        self.window.blit(font.render("Limpar Malha", 1, self.font_color),[520,25,300,20])
+        self.rect = rect
+        self.font_rect = font_rect
+        self.text = text
+        self.callback = callback
         
+        self.font = pygame.font.Font(None, 50)
+
+    # Define qual é a cor de fundo com base na posicao do mouse.
+    #
+    # @in pos: posicao do mouse
+    # @out: A cor de fundo.
+    def getBackgroundColor(self, pos):
+        if self.rect.collidepoint(pos):
+            return self.background_color_hovered
+        else:
+            return self.background_color
+
+    # Pinta o botao
+    def paint(self):
+        pos = pygame.mouse.get_pos() # Obtem a posicao do mouse.
+        pos = [pos[0], pos[1]]
+        
+        pygame.draw.rect(self.window, self.getBackgroundColor(pos), self.rect)
+        pygame.draw.rect(self.window, self.border_color, self.rect, self.border_thickness)
+        
+        self.window.blit(self.font.render(self.text, 1, self.font_color), self.font_rect)   

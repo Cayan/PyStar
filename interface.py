@@ -26,6 +26,7 @@ class Interface:
     margin_top = 100
     margin_bottom = 20
     background_color = white
+    buttons = [] # inicializa o vetor de botoes
 
     # Inicializa a classe
     #
@@ -37,7 +38,6 @@ class Interface:
         self.width = width
         self.caption = caption
         self.create()
-        self.btn = Button(self.window)
         self.log = Log(self.window)
 
     # Cria a janela e o objeto to tabuleiro.
@@ -47,6 +47,8 @@ class Interface:
         self.window = pygame.display.set_mode((self.width, self.height), 0, 32) # Cria a janela
         
         self.game = Game(self.window, self.width - self.margin_left - self.margin_right, self.height - self.margin_top - self.margin_bottom)
+        self.buttons.append(Button(self.window, pygame.Rect(20, 20, 300, 50), pygame.Rect(100, 25, 200, 20), "Calcular", None))
+        self.buttons.append(Button(self.window, pygame.Rect(480, 20, 300, 50), pygame.Rect(520, 25, 300, 20), "Limpar Malha", None))
 
     # Limpa a janela, pinta o tabuleiro e seus objetos e depois atualiza a janela.
     def paint(self):
@@ -54,10 +56,10 @@ class Interface:
 
         self.game.paint(pygame.Rect(self.margin_left, self.margin_top, self.game.width, self.game.height))
         
-        #Atualiza os botoes
-        self.btn.paint_button1()
-        self.btn.paint_button2()
-
+        # Atualiza os botoes
+        for i in range(len(self.buttons)):
+            self.buttons[i].paint()
+                    
         #Atualiza o log screen
         self.log.paint_log()
 
