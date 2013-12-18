@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 #################################################################################
 #                                                                               #
 #                                   Interface.py                                #
@@ -38,22 +38,33 @@ class Interface:
         self.width = width
         self.caption = caption
         self.create()
-        self.log = Log(self.window)
 
     # Cria a janela e o objeto to tabuleiro.
     def create(self):
         pygame.init() # Inicializa os modulos do pygame
         pygame.display.set_caption(self.caption) # Ajusta o titulo
         self.window = pygame.display.set_mode((self.width, self.height), 0, 32) # Cria a janela
+        self.log = Log(self.window, pygame.Rect(280, 20, 240, 50), pygame.Rect(335, 25, 200, 20))
         
-        self.game = Game(self.window, self.width - self.margin_left - self.margin_right, self.height - self.margin_top - self.margin_bottom)
-        self.buttons.append(Button(self.window, pygame.Rect(20, 20, 300, 50), pygame.Rect(100, 25, 200, 20), "Calcular", None))
-        self.buttons.append(Button(self.window, pygame.Rect(480, 20, 300, 50), pygame.Rect(520, 25, 300, 20), "Limpar Malha", None))
+        self.game = Game(self.window, self.log, self.width - self.margin_left - self.margin_right, self.height - self.margin_top - self.margin_bottom)
+        self.buttons.append(Button(self.window, pygame.Rect(20, 20, 250, 50), pygame.Rect(70, 25, 200, 20), "Calcular", self.game.start))
+        self.buttons.append(Button(self.window, pygame.Rect(530, 20, 250, 50), pygame.Rect(605, 25, 200, 20), "Limpar", self.clear))
+        
+        #escreve o log do inicio
+        self.log.update("Inicio")
+     
+    # Reinicia o valor das celulas.
+    def clear(self):
+        self.log.update("Limpa a malha")
+        for i in range(len(self.game.cells)):
+            for j in range(len(self.game.cells[i])):
+                self.game.cells[i][j].color = blue   
 
     # Limpa a janela, pinta o tabuleiro e seus objetos e depois atualiza a janela.
     def paint(self):
         self.window.fill(self.background_color)
 
+        # Atualiza o tabuleiro
         self.game.paint(pygame.Rect(self.margin_left, self.margin_top, self.game.width, self.game.height))
         
         # Atualiza os botoes
@@ -61,7 +72,7 @@ class Interface:
             self.buttons[i].paint()
                     
         #Atualiza o log screen
-        self.log.paint_log()
+        self.log.paint()
 
         pygame.display.update()
         
@@ -81,35 +92,19 @@ class Interface:
             elif event.type == MOUSEBUTTONUP: # Caso haja uma notificacao de clique.
                 pos = pygame.mouse.get_pos() # Obtem onde foi efetuado o clique.
 
-                #Verificamos se o clique foi na posicao do botao      
-                #Funcao do botao 1, usar A*          
-                if pos[0] > 20 and pos[0] < 320 and pos[1] < 70 and pos[1] > 20:
-                    self.log.text = "Calcula caminho" #atualiza o log
-                    self.log.write_log()
-
-                #Funcao do botao 2,limpar a malha
-                elif pos[0] > 480 and pos[0] < 780 and pos[1] < 70 and pos[1] > 20:
-                    self.log.text = "Limpa a malha" #atualiza o log
-                    self.log.write_log()
-                    for i in range(len(self.game.cells)):
-                        for j in range(len(self.game.cells[i])):
-                                self.game.cells[i][j].color = blue      
-
-
-                    #self.game.cells[i][j].paint(rect)                     
+                # Verificamos se o clique foi sobre um botao
+                for i in range(len(self.buttons)):
+                    if self.buttons[i].rect.collidepoint(pos):
+                        self.buttons[i].onClick() # chamamos a funcao associada ao botao
+                        break                       
 
                 # Ajusta a posicao e tenta obter a celula sobre este.
                 cell = self.game.getCell([pos[0] - self.margin_left, pos[1] - self.margin_top])
                 if cell: # Caso encontrada,atualiza o log.
-                    if cell.color == blue:
-                        self.log.text = "Atualiza " + str(cell.id) + " Blue -> Gray"
-                        self.log.write_log()
-                    if cell.color == gray:
-                        self.log.text = "Atualiza " + str(cell.id) + " Gray -> Yellow"
-                        self.log.write_log()
-                    if cell.color == yellow:
-                        self.log.text = "Atualiza " + str(cell.id) + " Yellow -> Blue"
-                        self.log.write_log() 
                     self.game.updateCell(cell) # Atualiza esta.
 
         return True
+
+    def onExit(self):
+        #escreve o log do fim
+		self.log.update("Fim")

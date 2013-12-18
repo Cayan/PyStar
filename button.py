@@ -24,7 +24,11 @@ class Button:
     # Inicializa a classe
     #
     # @in window: janela na qual este botao pertence
-    def __init__(self, window, rect, font_rect,text, callback):
+    # @in rect: rect do objeto
+    # @in font_rect: rect do texto
+    # @in text: texto
+    # @in callback: funcao do clique
+    def __init__(self, window, rect, font_rect, text, callback):
         self.window = window
         self.rect = rect
         self.font_rect = font_rect
@@ -42,6 +46,11 @@ class Button:
             return self.background_color_hovered
         else:
             return self.background_color
+    
+	# Executa a funcao associada ao botao, caso exista.
+    def onClick(self):
+        if self.callback:
+            self.callback()
 
     # Pinta o botao
     def paint(self):

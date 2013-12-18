@@ -13,10 +13,10 @@ import random
 import pygame
 import time
 
+from log import *
 from cell import *
 from colors import *
 from button import *
-from log import *
 
 class Game:
     border_color = black
@@ -34,10 +34,12 @@ class Game:
     # Inicializa a classe
     #
     # @in window: janela na qual esta celula pertence
+    # @in log: gerenciador de estados
     # @in width: largura do tabuleiro
     # @in height: altura do tabuleiro
-    def __init__(self, window, width, height):
+    def __init__(self, window, log, width, height):
         self.window = window
+        self.log = log
         self.height = height
         self.width = width
         self.cells = [] # inicializa a matriz de celulas
@@ -105,12 +107,19 @@ class Game:
     # @in cell: celula para ser alterada
     def updateCell(self, cell):
         if cell.color == blue:
+            self.log.update("Atualiza " + str(cell.id) + " Blue -> Gray")
             cell.color = gray
         elif cell.color == gray:
+            self.log.update("Atualiza " + str(cell.id) + " Gray -> Yellow")
             cell.color = yellow
         elif cell.color == yellow:
+            self.log.update("Atualiza " + str(cell.id) + " Yellow -> Blue")
             cell.color = blue
-    
+
+    # Inicia o movimento pela melhor trajetoria.
+    def start(self):
+        self.log.update("Calcula caminho")
+
     # Funcao que roda o tempo todo para determinar os eventos.
     def update(self):
         # verifica se esta nas bordas e/ou preso.
