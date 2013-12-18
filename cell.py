@@ -18,16 +18,25 @@ class Cell:
     color = blue
     border_thickness = 1
     border_color = green
+    
+    parent = None
+    cost_g = 0.0
+    cost_h = 0.0
+    cost = 0.0
 
     # Inicializa a classe
     #
     # @in window: janela na qual esta celula pertence
     # @in id: identificador da celula
     # @in rect: rect do objeto
-    def __init__(self, window, id, rect):
+    # @in y: indice y da celula na matriz de celulas
+    # @in x: indice x da celula na matriz de celulas
+    def __init__(self, window, id, rect, y, x):
         self.window = window
         self.id = id
         self.rect = rect
+        self.index_y = y
+        self.index_x = x
      
     # Pinta o objeto
     #

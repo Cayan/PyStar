@@ -48,18 +48,11 @@ class Interface:
         
         self.game = Game(self.window, self.log, self.width - self.margin_left - self.margin_right, self.height - self.margin_top - self.margin_bottom)
         self.buttons.append(Button(self.window, pygame.Rect(20, 20, 250, 50), pygame.Rect(70, 25, 200, 20), "Calcular", self.game.start))
-        self.buttons.append(Button(self.window, pygame.Rect(530, 20, 250, 50), pygame.Rect(605, 25, 200, 20), "Limpar", self.clear))
+        self.buttons.append(Button(self.window, pygame.Rect(530, 20, 250, 50), pygame.Rect(605, 25, 200, 20), "Limpar", self.game.clear))
         
         #escreve o log do inicio
         self.log.update("Inicio")
      
-    # Reinicia o valor das celulas.
-    def clear(self):
-        self.log.update("Limpa a malha")
-        for i in range(len(self.game.cells)):
-            for j in range(len(self.game.cells[i])):
-                self.game.cells[i][j].color = blue   
-
     # Limpa a janela, pinta o tabuleiro e seus objetos e depois atualiza a janela.
     def paint(self):
         self.window.fill(self.background_color)
@@ -91,20 +84,24 @@ class Interface:
                 return False
             elif event.type == MOUSEBUTTONUP: # Caso haja uma notificacao de clique.
                 pos = pygame.mouse.get_pos() # Obtem onde foi efetuado o clique.
-
+                
                 # Verificamos se o clique foi sobre um botao
-                for i in range(len(self.buttons)):
-                    if self.buttons[i].rect.collidepoint(pos):
-                        self.buttons[i].onClick() # chamamos a funcao associada ao botao
-                        break                       
+                if event.button == 1:
+                    for i in range(len(self.buttons)):
+                        if self.buttons[i].rect.collidepoint(pos):
+                            self.buttons[i].onClick() # chamamos a funcao associada ao botao
+                            break                       
 
                 # Ajusta a posicao e tenta obter a celula sobre este.
-                cell = self.game.getCell([pos[0] - self.margin_left, pos[1] - self.margin_top])
-                if cell: # Caso encontrada,atualiza o log.
-                    self.game.updateCell(cell) # Atualiza esta.
+                cell = self.game.getCellByPosition([pos[0] - self.margin_left, pos[1] - self.margin_top])
+                if cell: # Caso encontrada
+                    if event.button == 1:
+                        self.game.updateCell(cell) # Atualiza esta.
+                    if event.button == 3:
+                        self.game.text = "Cell: " + str(cell.id) + ". Cost G: " + str(cell.cost_g) + ". Cost H: " + str(cell.cost_h)
 
         return True
 
     def onExit(self):
         #escreve o log do fim
-		self.log.update("Fim")
+        self.log.update("Fim")
