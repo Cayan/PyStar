@@ -67,9 +67,9 @@ class Game:
             top += self.cell_height + self.cell_margin
             left = 0
 
-    # Ajusta a ponto para o local onde as celulas comecam a ser pintadas e verifica se o ponto esta sobre alguma celula
+    # Ajusta a ponto para o local onde as celulas comecam a ser pintadas e verifica se o ponto esta sobre alguma celula.
     #
-    # #in pos: vetor com a coordenada x e y, ajustada para o posicionamento local do tabuleiro.
+    # @in pos: vetor com a coordenada x e y, ajustada para o posicionamento local do tabuleiro.
     # @out: A celula sobre o ponto ou None.
     def getCellByPosition(self, pos):
         pos[0] -= self.border_thickness + (self.width - ((self.cell_width + self.cell_margin) * self.cell_count_horizontal))/2
@@ -81,6 +81,10 @@ class Game:
 
         return None
         
+    # Identifica uma celula através de seu id.
+    #
+    # @in id: id da célula.
+    # @out: A célula procurada ou None.
     def getCellById(self, id):
         for i in range(len(self.cells)):
             for j in range(len(self.cells[i])):
@@ -106,9 +110,8 @@ class Game:
                 
         # Pintamos o texto overlay
         font = pygame.font.Font(None, 40)
-        text = font.render(self.text, True, red)
-        self.window.blit(text, [self.width/2 - 120, self.height/2])
-
+        text = font.render(self.text, True, white)
+        self.window.blit(text, [self.width/2 - 160, self.height/2 - 135])
 
     # Atualizamos a cor da celula.
     #
@@ -127,6 +130,7 @@ class Game:
             self.log.update("Atualiza " + str(cell.id) + " Black -> Blue")
             cell.color = blue
 
+    # Calcula a distancia entre duas celulas atraves do método Manhattan
     def getManhattanDistance(self, cellA, cellB):
         return math.fabs(cellA.index_x - cellB.index_x) + math.fabs(cellA.index_y - cellB.index_y)
         
@@ -136,20 +140,19 @@ class Game:
         for i in range(len(self.cells)):
             for j in range(len(self.cells[i])):
                 self.cells[i][j].color = blue
-                #self.cells[i][j].cost_g = 0.0
-                #self.cells[i][j].cost_h = 0.0
-                #self.cells[i][j].color = 0.0
-                
+               
+        self.text = ""
         for i in self.path:
             self.path.remove(i)
 
-    # Inicia o movimento pela melhor trajetoria.
+    # Inicia a busca pela melhor trajetoria.
     def start(self):
         self.log.update("Calcula caminho")
         
         start = None
         goal = None
         
+        # Verificacoes iniciais
         for i in range(len(self.cells)):
             for j in range(len(self.cells[i])):
                 if self.cells[i][j].color == gray:
@@ -166,61 +169,77 @@ class Game:
                         
                     goal = self.cells[i][j]
         
-        closedset = []
-        openset = []
-        
         if start == None or goal == None:
             self.log.update("Voce deve definir um inicio e fim.")
             return
+            
+        # Limpa trajetorias recentes
+        for i in range(len(self.cells)):
+            for j in range(len(self.cells[i])):
+                if self.cells[i][j].color == red:
+                    self.cells[i][j].color = blue
 
+        # Inicia as duas listas principais para o algoritmo
+        closedset = []
+        openset = []
+                
+        # Adiciona o ponto inicial na lista de possiveis caminhos
         openset.append(start)
+        
+        # Enquanto houver algum caminho possivel
         while len(openset) > 0:
             current = None
-            for cell in openset:
+            for cell in openset: # Busca o menor caminho dentre os possiveis
                 if current == None or cell.cost < current.cost or (cell.cost == current.cost and random.randint(0, 1) == 0):
                     current = cell
             
+            # Remove esta celular da lista de possibilidades e adiciona ela na lista de celulas ja verificadas
             closedset.append(current)
-            if current == goal:
+            openset.remove(current)
+            if current == goal: # Verifica se este e a celula final
                 break
 
+            # Realiza uma busca nas celulas adjacentes
             for i in [0, 1]:
                 for j in [-1, 1]:
                     x = current.index_x - j*i
                     y = current.index_y - j*(1 - i)
+                    
+                    # Verifica se esta possivel celula adjacente esta fora dos limites do tabuleiro
                     if x == -1 or y == -1 or x == self.cell_count_horizontal or y == self.cell_count_vertical:
                         continue
             
                     neighbor = self.cells[y][x]
-                    if neighbor.color == black:
+                    if neighbor.color == black: # Se for da cor preta, nao e possivel passar
                         closedset.append(neighbor)
 
-                    if neighbor in closedset:
+                    if neighbor in closedset: # Se esta na lista de celulas ja verificadas, ignorar
                         continue
 
-                    if neighbor in openset:
-                        if current.cost_g + 1.0 < neighbor.cost_g:
+                    if neighbor in openset: # Se ja esta na lista de caminhos possiveis
+                        if current.cost_g + 1.0 < neighbor.cost_g: # Verifica se este e um caminho melhor, se for substitua os custos
                             neighbor.parent = current
                         
                             neighbor.cost_g = current.cost_g + 1.0
                             neighbor.cost_h = self.getManhattanDistance(neighbor, goal)
                             neighbor.cost = neighbor.cost_g + neighbor.cost_h
-                    else:
+                    else: # Adiciona a celula a lista de possibilidade e adiciona os seus custos
                         openset.append(neighbor)
-                        neighbor.parent = current
+                        neighbor.parent = current # Adiciona a celula adjacente uma referencia a esta celula como sua responsavel, ou 'pai'
                         
                         neighbor.cost_g = current.cost_g + 1.0
                         neighbor.cost_h = self.getManhattanDistance(neighbor, goal)
                         neighbor.cost = neighbor.cost_g + neighbor.cost_h
 
-            openset.remove(current)
-            
+        # Partindo do ponto inicial, trace a rota atraves das celulas 'pai' de cada uma
         current = goal.parent
-        while current != None:
-            self.path.append(current)
-            current = current.parent
-            
-        self.path.reverse()
+        if current: # Caso exista algum caminho possivel
+            while current != start:
+                self.path.append(current)
+                current = current.parent
+                
+            # A trajetoria e o caminho reverso a este definido
+            self.path.reverse()
 
     # Funcao que roda o tempo todo para determinar os eventos.
     def update(self):
