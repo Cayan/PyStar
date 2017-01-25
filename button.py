@@ -37,7 +37,7 @@ class Button:
         
         self.font = pygame.font.Font(None, 50)
 
-    # Define qual é a cor de fundo com base na posicao do mouse.
+    # Define qual e a cor de fundo com base na posicao do mouse.
     #
     # @in pos: posicao do mouse
     # @out: A cor de fundo.

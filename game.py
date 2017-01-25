@@ -81,10 +81,10 @@ class Game:
 
         return None
         
-    # Identifica uma celula através de seu id.
+    # Identifica uma celula atraves de seu id.
     #
-    # @in id: id da célula.
-    # @out: A célula procurada ou None.
+    # @in id: id da celula.
+    # @out: A celula procurada ou None.
     def getCellById(self, id):
         for i in range(len(self.cells)):
             for j in range(len(self.cells[i])):
@@ -130,7 +130,7 @@ class Game:
             self.log.update("Atualiza " + str(cell.id) + " Black -> Blue")
             cell.color = blue
 
-    # Calcula a distancia entre duas celulas atraves do método Manhattan
+    # Calcula a distancia entre duas celulas atraves do metodo Manhattan
     def getManhattanDistance(self, cellA, cellB):
         return math.fabs(cellA.index_x - cellB.index_x) + math.fabs(cellA.index_y - cellB.index_y)
         
